@@ -1,13 +1,20 @@
 FROM curlimages/curl:latest AS downloader
 WORKDIR /tmp
+
+# Download AWS SDK bundle
 RUN curl -L -o aws-java-sdk-bundle-1.12.506.jar \
     https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.506/aws-java-sdk-bundle-1.12.506.jar
+
+# Download PostgreSQL JDBC driver
+RUN curl -L -o postgresql-42.7.3.jar \
+    https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.3/postgresql-42.7.3.jar
 
 # Use the original Hive image
 FROM apache/hive:standalone-metastore-4.1.0
 
 # Copy the downloaded JAR from the downloader stage
 COPY --from=downloader /tmp/aws-java-sdk-bundle-1.12.506.jar /opt/hadoop/share/hadoop/tools/lib/
+COPY --from=downloader /tmp/postgresql-42.7.3.jar /opt/hadoop/share/hadoop/tools/lib/
 
 # Set proper permissions and verify
 #RUN chmod 644 /opt/hadoop/share/hadoop/tools/lib/aws-java-sdk-bundle-1.12.506.jar && \
